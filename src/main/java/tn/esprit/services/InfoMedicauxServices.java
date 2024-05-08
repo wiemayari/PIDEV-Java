@@ -17,14 +17,15 @@ public class InfoMedicauxServices implements IService<InfoMedicaux> {
 
     @Override
     public void add(InfoMedicaux infoMedicaux) {
-        try (PreparedStatement preparedStatement = MaConnexion.getInstance().getCnx().prepareStatement("INSERT INTO info_medicaux( maladie, description, nbr_vaccin, date_vaccin, blood_type, sickness_estimation) VALUES (?,?,?,?,?,?)")) {
+        try (PreparedStatement preparedStatement = MaConnexion.getInstance().getCnx().prepareStatement("INSERT INTO info_medicaux( Baby_name_id, maladie, description, nbr_vaccin, date_vaccin, blood_type, sickness_estimation) VALUES (?,?,?,?,?,?,?)")) {
+            preparedStatement.setInt(1,infoMedicaux.getBaby_name_id());
 
-            preparedStatement.setString(1, infoMedicaux.getMaladie());
-            preparedStatement.setString(2, infoMedicaux.getDescription());
-            preparedStatement.setInt(3, infoMedicaux.getNbr_vaccin());
-            preparedStatement.setDate(4, infoMedicaux.getDate_vaccin());
-            preparedStatement.setString(5, infoMedicaux.getBlood_type());
-            preparedStatement.setString(6, infoMedicaux.getSickness_estimation());
+            preparedStatement.setString(2, infoMedicaux.getMaladie());
+            preparedStatement.setString(3, infoMedicaux.getDescription());
+            preparedStatement.setInt(4, infoMedicaux.getNbr_vaccin());
+            preparedStatement.setDate(5, infoMedicaux.getDate_vaccin());
+            preparedStatement.setString(6, infoMedicaux.getBlood_type());
+            preparedStatement.setString(7, infoMedicaux.getSickness_estimation());
 
             preparedStatement.executeUpdate();
             System.out.println("InfoMedicaux added successfully.");
@@ -62,6 +63,29 @@ public class InfoMedicauxServices implements IService<InfoMedicaux> {
             ex.printStackTrace();
         }
     }
+    public List<InfoMedicaux> getByNomBaby(String babyName) {
+        List<InfoMedicaux> infoMedicauxList = new ArrayList<>();
+        try (PreparedStatement preparedStatement = MaConnexion.getInstance().getCnx().prepareStatement("SELECT * FROM info_medicaux INNER JOIN baby ON info_medicaux.baby_name_id = baby.id WHERE baby.babynom = ?")) {
+            preparedStatement.setString(1, babyName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                InfoMedicaux infoMedicaux = new InfoMedicaux();
+                infoMedicaux.setId(resultSet.getInt("id"));
+                infoMedicaux.setBaby_name_id(resultSet.getInt("baby_name_id"));
+                infoMedicaux.setMaladie(resultSet.getString("maladie"));
+                infoMedicaux.setDescription(resultSet.getString("description"));
+                infoMedicaux.setNbr_vaccin(resultSet.getInt("nbr_vaccin"));
+                infoMedicaux.setDate_vaccin(resultSet.getDate("date_vaccin"));
+                infoMedicaux.setBlood_type(resultSet.getString("blood_type"));
+                infoMedicaux.setSickness_estimation(resultSet.getString("sickness_estimation"));
+                infoMedicauxList.add(infoMedicaux);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return infoMedicauxList;
+    }
+
 
     @Override
     public List<InfoMedicaux> getAll() {
@@ -108,4 +132,44 @@ public class InfoMedicauxServices implements IService<InfoMedicaux> {
         }
         return infoMedicaux;
     }
+
+    public int getTotalNumberOfBabies() {
+        int totalNumberOfBabies = 0;
+        try (Statement statement = MaConnexion.getInstance().getCnx().createStatement()) {
+            ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM baby");
+            if (resultSet.next()) {
+                totalNumberOfBabies = resultSet.getInt(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return totalNumberOfBabies;
+    }
+
+    public int getNumberOfBoys() {
+        int numberOfBoys = 0;
+        try (Statement statement = MaConnexion.getInstance().getCnx().createStatement()) {
+            ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM baby WHERE sexe = 'masculin'");
+            if (resultSet.next()) {
+                numberOfBoys = resultSet.getInt(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return numberOfBoys;
+    }
+
+    public int getNumberOfGirls() {
+        int numberOfGirls = 0;
+        try (Statement statement = MaConnexion.getInstance().getCnx().createStatement()) {
+            ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM baby WHERE sexe = 'feminine'");
+            if (resultSet.next()) {
+                numberOfGirls = resultSet.getInt(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return numberOfGirls;
+    }
+
 }

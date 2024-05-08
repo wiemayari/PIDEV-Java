@@ -13,6 +13,7 @@ public class Baby {
     private LocalDate dateNaissance;
     private float taille;
     private float poids;
+    private boolean sick;
 
     public Baby(String nom, String prenom, String sexe, LocalDate dateNaissance, float taille, float poids) {
         this.nom = nom;
@@ -111,5 +112,13 @@ public class Baby {
 
     public void setBtnSupprimer(Button btnSupprimer) {
         this.btnSupprimer = btnSupprimer;
+    }
+
+    public boolean isSick() {
+        return sick;
+    }
+
+    public void setSick(boolean sick) {
+        this.sick = sick;
     }
 }

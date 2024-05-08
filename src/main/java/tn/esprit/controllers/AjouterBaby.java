@@ -45,63 +45,62 @@ public class AjouterBaby {
 
     @FXML
     void ajouterBaby(ActionEvent event) {
+        try {
+            // Retrieve data from UI components
+            String nom = name.getText();
+            String prenom = lastname.getText();
+            String sexe = gender.getValue();
+            LocalDate dateNaissance = dateofbirth.getValue();
+            float poids = Float.parseFloat(weight.getText());
+            float taille = Float.parseFloat(size.getText());
 
-            try {
-                String nom = name.getText();
-                String prenom = lastname.getText();
-                String sexe = gender.getValue();
-                LocalDate dateNaissance = dateofbirth.getValue();
-                float poids = Float.parseFloat(weight.getText());
-                float taille = Float.parseFloat(size.getText());
-
-                // Vérifiez si tous les champs sont remplis
-                if (nom.isEmpty() || prenom.isEmpty() || sexe == null || dateNaissance == null || weight.getText().isEmpty() || size.getText().isEmpty()) {
-                    // Affichez un message d'erreur si un champ est vide
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("Veuillez remplir tous les champs !");
-                    alert.showAndWait();
-                    return; // Sortez de la méthode
-                }
-
-                // Créez une instance de votre service BabyServices et ajoutez le bébé
-                BabyServices babyServices = new BabyServices ();
-                babyServices.add(new Baby(0, nom, prenom, sexe, dateNaissance, poids, taille));
-
-                // Affichez un message de succès
-                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                successAlert.setContentText("Bébé ajouté avec succès !");
-                successAlert.showAndWait();
-
-                // Fermez la fenêtre actuelle si nécessaire
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                stage.close();
-
-                // Si vous devez naviguer vers une autre vue, utilisez FXMLLoader et affichez la nouvelle vue
-                // FXMLLoader loader = new FXMLLoader(getClass().getResource("NOM_DE_VOTRE_FICHIER_FXML.fxml"));
-                // Parent root = loader.load();
-                // Scene scene = new Scene(root);
-                // Stage newStage = new Stage();
-                // newStage.setScene(scene);
-                // newStage.setTitle("Titre de la nouvelle vue");
-                // newStage.show();
-                navigateToAjouterInfoMedicaux(event);
-
-            } catch (Exception e) {
-                // Gérez les exceptions si nécessaire
-                e.printStackTrace();
+            // Data validation
+            // Validate if all fields are filled
+            if (nom.isEmpty() || prenom.isEmpty() || sexe == null || dateNaissance == null || weight.getText().isEmpty() || size.getText().isEmpty()) {
+                // Display an error message if any field is empty
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Veuillez remplir tous les champs !");
+                alert.showAndWait();
+                return; // Exit the method
             }
-        }
 
+            // Create an instance of your BabyServices and add the baby
+            BabyServices babyServices = new BabyServices();
+            Baby newBaby = new Baby(nom, prenom, sexe, dateNaissance, poids, taille);
+            babyServices.add(newBaby);
+
+            // Display a success message
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setContentText("Bébé ajouté avec succès !");
+            successAlert.showAndWait();
+
+            // Close the current window if necessary
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.close();
+
+            // If you need to navigate to another view, use FXMLLoader and display the new view
+            navigateToAjouterInfoMedicaux(event);
+        } catch (Exception e) {
+            // Handle exceptions if necessary
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void navigateToAjouterInfoMedicaux(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterInfoMedicaux.fxml"));
             Parent root = loader.load();
+
+            // Obtain the controller of the AjouterInfoMedicaux view
+            AjouterInfoMedicaux controller = loader.getController();
+
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
-            stage.setTitle("Add Medical Information");
+            stage.setTitle("Ajouter des informations médicales");
             stage.show();
 
-            // Close the current window
+            // Close the current window if necessary
             Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             currentStage.close();
         } catch (IOException e) {
@@ -109,6 +108,9 @@ public class AjouterBaby {
             e.printStackTrace();
         }
     }
+
+
+
 
 
 
@@ -121,6 +123,28 @@ public class AjouterBaby {
    
 
     public void naviguerInfoMedicaux(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterInfoMedicaux.fxml"));
+            Parent root = loader.load();
+
+            // Obtain the controller of the AjouterInfoMedicaux view
+            AjouterInfoMedicaux controller = loader.getController();
+
+            // Pass the baby ID to the AjouterInfoMedicaux controller
+            // controller.initBabyId(babyId); // Assurez-vous que babyId est défini correctement dans votre classe AjouterBaby
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Ajouter des informations médicales");
+            stage.show();
+
+            // Fermez la fenêtre actuelle si nécessaire
+          //  Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            //currentStage.close();
+        } catch (IOException e) {
+            // Gérer les exceptions si nécessaire
+            e.printStackTrace();
+        }
     }
 
     public void naviguerBaby(ActionEvent actionEvent) {

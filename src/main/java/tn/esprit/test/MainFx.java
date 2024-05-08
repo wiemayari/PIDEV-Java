@@ -13,11 +13,11 @@ public class MainFx extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherInfoMedicauxBack.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterInfoMedicaux.fxml"));
         try {
             Parent root = loader.load();
             Scene scene =new Scene(root);
-            primaryStage.setTitle("Affichage des medcins ");
+            primaryStage.setTitle("Affichage des infoMedicaux ");
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {

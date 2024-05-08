@@ -41,7 +41,7 @@
                 </VBox>
             </children>
         </HBox>
-        <TableView fx:id="InfoMedicauxtable" layoutX="200.0" layoutY="75.0" prefHeight="307.0" prefWidth="1005.0">
+        <TableView fx:id="InfoMedicauxtable" layoutX="200.0" layoutY="75.0" prefHeight="279.0" prefWidth="1005.0">
             <columns>
                 <TableColumn fx:id="nombabycolumn" prefWidth="119.33334350585938" text="Babyname" />
                 <TableColumn fx:id="maladiecolomn" minWidth="0.0" prefWidth="122.66665649414062" text="Desease" />

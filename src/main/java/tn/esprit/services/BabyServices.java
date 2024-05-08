@@ -79,7 +79,19 @@ public class BabyServices implements IService<Baby> {
         return null; // If no baby found with the given ID, return null
     }
 
-
+    public List<String> getAllBabyName() {
+        List<String> babyNames = new ArrayList<>();
+        try (Statement statement = MaConnexion.getInstance().getCnx().createStatement()) {
+            ResultSet resultSet = statement.executeQuery("SELECT nom FROM baby");
+            while (resultSet.next()) {
+                String name = resultSet.getString("nom");
+                babyNames.add(name);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return babyNames;
+    }
 
     public void update(Baby b) {
         try (PreparedStatement preparedStatement = MaConnexion.getInstance().getCnx().prepareStatement("UPDATE baby SET nom=?, prenom=?, sexe=?, date_naissance=?, poids=?, taille=? WHERE id=?")) {
@@ -110,25 +122,92 @@ public class BabyServices implements IService<Baby> {
     }
 
 
-    public List<Baby> search(int id) {
+
+
+
+    public List<Baby> search(String name) { // Change parameter type to String
         List<Baby> babyList = new ArrayList<>();
-        try (PreparedStatement preparedStatement = MaConnexion.getInstance().getCnx().prepareStatement("SELECT * FROM baby WHERE id=?")) {
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
+        try {
+            String query = "SELECT * FROM baby WHERE nom=?";
+            PreparedStatement pst = MaConnexion.getInstance().getCnx().prepareStatement(query);
+            pst.setString(1, name); // Set the value of the name parameter
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
                 Baby baby = new Baby();
-                baby.setId(resultSet.getInt("id"));
-                baby.setNom(resultSet.getString("nom"));
-                baby.setPrenom(resultSet.getString("prenom"));
-                baby.setSexe(resultSet.getString("sexe"));
-                baby.setDateNaissance(resultSet.getDate("date_naissance").toLocalDate());
-                baby.setPoids(resultSet.getFloat("poids"));
-                baby.setTaille(resultSet.getFloat("taille"));
+                baby.setId(rs.getInt("id"));
+                baby.setNom(rs.getString("nom"));
+                baby.setPrenom(rs.getString("prenom"));
+                baby.setSexe(rs.getString("sexe"));
+                baby.setDateNaissance(rs.getDate("date_naissance").toLocalDate());
+                baby.setPoids(rs.getFloat("poids"));
+                baby.setTaille(rs.getFloat("taille"));
                 babyList.add(baby);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching for baby: " + e.getMessage());
+        }
+        return babyList;
+    }
+    public double calculateSicknessPercentage() {
+        List<Baby> babies = getAll();
+        if (babies.isEmpty()) {
+            return 0.0; // Return 0 if there are no babies
+        }
+
+        int sickCount = 0;
+        for (Baby baby : babies) {
+            if (baby.isSick()) { // Assuming isSick() returns true if the baby is sick
+                sickCount++;
+            }
+        }
+
+        return ((double) sickCount / babies.size()) * 100; // Calculate the percentage
+    }
+
+    public int getBabyIdByName(String babyName) {
+        try (PreparedStatement preparedStatement = MaConnexion.getInstance().getCnx().prepareStatement("SELECT id FROM baby WHERE nom=?")) {
+            preparedStatement.setString(1, babyName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return babyList;
+        return -1; // Return -1 if no baby found with the given name
     }
+    public double calculateBoysPercentage() {
+        List<Baby> babies = getAll();
+        if (babies.isEmpty()) {
+            return 0.0; // Return 0 if there are no babies
+        }
+
+        int boysCount = 0;
+        for (Baby baby : babies) {
+            if (baby.getSexe().equals("masculin")) { // Assuming "M" represents boys and "F" represents girls
+                boysCount++;
+            }
+        }
+
+        return ((double) boysCount / babies.size()) * 100; // Calculate the percentage of boys
+    }
+
+    public double calculateGirlsPercentage() {
+        List<Baby> babies = getAll();
+        if (babies.isEmpty()) {
+            return 0.0; // Return 0 if there are no babies
+        }
+
+        int girlsCount = 0;
+        for (Baby baby : babies) {
+            if (baby.getSexe().equals("feminine")) { // Assuming "M" represents boys and "F" represents girls
+                girlsCount++;
+            }
+        }
+
+        return ((double) girlsCount / babies.size()) * 100; // Calculate the percentage of girls
+    }
+
+
 }
+

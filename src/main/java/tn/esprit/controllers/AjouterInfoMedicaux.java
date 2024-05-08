@@ -2,17 +2,25 @@ package tn.esprit.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import jdk.internal.icu.impl.NormalizerImpl;
 import tn.esprit.entities.InfoMedicaux;
 
+import tn.esprit.services.BabyServices;
 import tn.esprit.services.InfoMedicauxServices;
+import tn.esprit.util.MaConnexion;
 
+import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 public class AjouterInfoMedicaux {
 
@@ -21,6 +29,9 @@ public class AjouterInfoMedicaux {
     private String[] bloodtypes = {"O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"};
 
 
+
+    @FXML
+    private TextField idbaby;
 
     @FXML
     private DatePicker dateoflastvaccin;
@@ -33,10 +44,28 @@ public class AjouterInfoMedicaux {
 
     @FXML
     private TextField numberofvaccines;
-
+private BabyServices babyServices;
     @FXML
     private ChoiceBox<String> sicknessestimation;
     private String[] sicknessestimations = {"25%", "50%", "75%", "100%"};
+    private int babyId;
+    @FXML
+    private ComboBox<String> babyComboBox;
+    private String desc;
+    private String maladie;
+    private int nbrVaccin;
+    private LocalDate dateVaccin;
+    private String bloodType;
+    private String sicknessEstimation;
+    private String selectedBabyName;
+    private NormalizerImpl.ReorderingBuffer nbrVaccinesText;
+
+    // Méthode pour initialiser babyId
+   /* public void initBabyId(int babyId) {
+        this.babyId = babyId;
+    }*/
+
+
 
     @FXML
     public void initialize() {
@@ -45,52 +74,123 @@ public class AjouterInfoMedicaux {
 
         // Initialize the ChoiceBox for sickness estimation
         sicknessestimation.getItems().addAll(sicknessestimations);
+
+        Connection connection = MaConnexion.getInstance().getCnx();
+        babyServices = new BabyServices(connection);
+
+        List<String> babyNames = babyServices.getAllBabyName();
+
+        babyComboBox.getItems().addAll(babyNames);
+    }
+
+    @FXML
+    void naviguerHome(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Statistics.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL); // Set the modality to APPLICATION_MODAL
+            stage.setScene(new Scene(root));
+            stage.setTitle("Statistics"); // Set the title of the new window
+            stage.showAndWait(); // Show the window and wait for it to be closed
+
+            // Code below will only execute after the popup window is closed
+            // You can add any additional logic here
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
     @FXML
     void ajouterInfoMedicaux(ActionEvent event) {
         try {
-            int babyNameId = 1; // Remplacez 1 par l'ID réel du bébé, car il est actuellement en dur.
-            String maladie = diseasename.getText();
-            String desc = description.getText();
-            int nbrVaccin = Integer.parseInt(numberofvaccines.getText());
-            LocalDate dateVaccin = dateoflastvaccin.getValue();
-            String bloodType = bloodtype.getValue();
-            String sicknessEstimation = sicknessestimation.getValue();
+            // Retrieve data from UI components
+            maladie = diseasename.getText().trim();
+            desc = description.getText().trim();
+            nbrVaccin = Integer.parseInt(numberofvaccines.getText().trim());
+            dateVaccin = dateoflastvaccin.getValue();
+            bloodType = bloodtype.getValue();
+            sicknessEstimation = sicknessestimation.getValue();
 
-            // Vérifiez si tous les champs sont remplis
-            if (maladie.isEmpty() || desc.isEmpty() || dateVaccin == null || bloodType == null || sicknessEstimation == null) {
-                // Affichez un message d'erreur si un champ est vide
+            // Data validation
+            if (maladie.isEmpty() || desc.isEmpty() || nbrVaccin == 0 || dateVaccin == null || bloodType == null || sicknessEstimation == null) {
+                // Show error message if any field is empty
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setContentText("Veuillez remplir tous les champs !");
                 alert.showAndWait();
-                return; // Sortez de la méthode
+                return;
             }
 
-            // Créez une instance de votre service InfoMedicauxService et ajoutez les informations médicales
-            InfoMedicauxServices infoMedicauxService = new InfoMedicauxServices();
-            infoMedicauxService.add(new InfoMedicaux(0, babyNameId, maladie, desc, nbrVaccin, Date.valueOf(dateVaccin), bloodType, sicknessEstimation));
+            // Retrieve baby ID by name
+            String selectedBabyName = babyComboBox.getValue();
+            int babyId = babyServices.getBabyIdByName(selectedBabyName);
 
-            // Affichez un message de succès
+            // Create InfoMedicaux object with the retrieved data
+            InfoMedicaux infoMedicaux = new InfoMedicaux(babyId, maladie, desc, nbrVaccin, Date.valueOf(dateVaccin), bloodType, sicknessEstimation);
+
+            // Add the InfoMedicaux object to the database
+            InfoMedicauxServices infoMedicauxService = new InfoMedicauxServices();
+            infoMedicauxService.add(infoMedicaux);
+
+            // Show success message
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setContentText("Informations médicales ajoutées avec succès !");
             successAlert.showAndWait();
+
+            // Close the current window if necessary
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.close();
+        } catch (NumberFormatException e) {
+            // Handle number format exception for parsing number of vaccines
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Veuillez entrer un nombre valide pour le nombre de vaccins !");
+            alert.showAndWait();
         } catch (Exception e) {
-            // Gérez les exceptions si nécessaire
+            // Handle other exceptions
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    void naviguerinfoMedicaux(ActionEvent event){}
+    @FXML
+    void naviguerBaby(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterBaby.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Ajouter un bébé");
+            stage.show();
+
+            // Close the current stage (if needed)
+            Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            currentStage.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @FXML
-    void initialize(ActionEvent event) {
+    void naviguerListOfBabiesFront(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ListOfBabiesFront.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("List of Babies");
+            stage.show();
+
+            // Close the current stage (if needed)
+            Stage currentStage = (Stage) idbaby.getScene().getWindow();
+            currentStage.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    @FXML
-    void naviguerEtab(ActionEvent event) {
-    }
-
-    @FXML
-    void naviguerrendez(ActionEvent event) {
-    }
 }

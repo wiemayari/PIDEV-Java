@@ -31,3 +31,30 @@
 .anchor-pane {
     -fx-background-color: #f4f4f4;
 }
+.pane_backk_body{
+    -fx-background-color: #ff1493;
+    -fx-border-width: 2px 2px 2px 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #eeeeee;
+    -fx-border-style: solid;
+}
+Otheer_btn{
+    -fx-background-color: #bb2f7a;
+    -fx-border-width: 2px 2px 2px 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-style: solid;
+    -fx-border-color: #ff1493;
+    -fx-font-family: "Century Gothic";
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+}
+.pane_Body00{
+    -fx-background-color: #c42c7c;
+    -fx-border-width: 2px 2px 2px 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-style: solid;
+    -fx-border-color:#eeeeee;
+}

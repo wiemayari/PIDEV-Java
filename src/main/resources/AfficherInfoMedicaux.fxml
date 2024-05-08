@@ -7,8 +7,12 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AfficherInfoMedicauxBack">
     <children>
+        <PieChart fx:id="genderPieChart" layoutX="20.0" layoutY="60.0" prefHeight="300.0" prefWidth="300.0" />
+        <Label fx:id="sicknessPercentageLabel" layoutX="350.0" layoutY="20.0" prefHeight="30.0" prefWidth="230.0" style="-fx-text-fill: red;" text="Sickness Percentage: " />
         <TableView fx:id="etablissementTable" layoutX="111.0" layoutY="110.0" prefHeight="205.0" prefWidth="394.0" style="-fx-background-color: #FFC0CB;">
             <columns>
                 <TableColumn fx:id="nomColum" prefWidth="144.79998779296875" style="-fx-background-color: #DB7093;" text="Nom" />
